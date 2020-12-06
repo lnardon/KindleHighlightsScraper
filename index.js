@@ -13,6 +13,7 @@ dotenv.config();
   await page.setViewport({ width: 1272, height: 1281 });
 
   // Handle Amazon Signin
+  console.log("Starting Login...");
   await page.waitForSelector(
     ".contentBox > .column_right > #choices > .third_party_sign_in > .gr-button--amazon"
   );
@@ -32,8 +33,10 @@ dotenv.config();
   await newPage.click(
     ".a-section > .a-spacing-none > .a-section > .a-box > .a-box-inner"
   );
+  console.log("Login Successful!");
 
   // Open highlights page
+  console.log("Fetching books and highlights...");
   await page.waitForSelector(
     ".siteHeader__contents > .siteHeader__primaryNavInline > .siteHeader__menuList > .siteHeader__topLevelItem:nth-child(2) > .siteHeader__topLevelLink"
   );
@@ -83,8 +86,10 @@ dotenv.config();
     books.push({ title: bookTitle, highlights: highlights });
     await page.goBack();
   }
+  console.log("Books and highlights fetched!");
 
   // Save as txt
+  console.log("Saving to file...");
   let txtContent = "";
   for (let i = 0; i < books.length; i++) {
     txtContent += `${books[i].title}\n\n`;
@@ -96,6 +101,7 @@ dotenv.config();
   fs.writeFile("./kindleHighlights.txt", txtContent, (err) => {
     if (err) console.log(err);
   });
+  console.log("Saved to file!");
 
   // Close browser
   await browser.close();
