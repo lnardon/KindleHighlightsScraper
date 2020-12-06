@@ -1,15 +1,16 @@
 const puppeteer = require("puppeteer");
 const fs = require("fs");
 const dotenv = require("dotenv");
+const myArgs = process.argv.slice(2);
 dotenv.config();
 (async () => {
   // Puppeteer Config
-  const browser = await puppeteer.launch({ headless: false });
+  const browser = await puppeteer.launch({
+    headless: myArgs[0] === "true" ? true : false,
+  });
   const page = await browser.newPage();
-  const navigationPromise = page.waitForNavigation();
   await page.goto("https://www.goodreads.com/user/sign_in?source=home");
   await page.setViewport({ width: 1272, height: 1281 });
-  await navigationPromise;
 
   // Handle Amazon Signin
   await page.waitForSelector(
@@ -18,7 +19,6 @@ dotenv.config();
   const link = await page.$(
     ".contentBox > .column_right > #choices > .third_party_sign_in > .gr-button--amazon"
   );
-  page.typ;
   const newPagePromise = new Promise((x) => page.once("popup", x));
   await link.click();
   const newPage = await newPagePromise;
@@ -50,17 +50,15 @@ dotenv.config();
     "body > div.content > div.mainContentContainer > div.mainContent > div.mainContentFloat > div.gr-annotatedBooksLandingPage > div > div > div > div.annotatedBooksPage > div > div.annotatedBooksList"
   );
 
-  // Gets all books
+  // Gets all books and highlights
   let booksLength = await page.$eval(
     "body > div.content > div.mainContentContainer > div.mainContent > div.mainContentFloat > div.gr-annotatedBooksLandingPage > div > div > div > div.annotatedBooksPage > div > div.annotatedBooksList",
     (e) => {
       return e.children.length;
     }
   );
-
   let books = [];
-  // CHANGE i FOR booksLength
-  for (let i = 0; i < 1; i++) {
+  for (let i = 0; i < booksLength; i++) {
     await page.click(
       `.annotatedBookItem:nth-child(${
         i + 1
@@ -85,9 +83,20 @@ dotenv.config();
     books.push({ title: bookTitle, highlights: highlights });
     await page.goBack();
   }
-  console.log(books);
-  fs.writeFile("./kindleHighlights.txt", JSON.stringify(books), (err) => {
+
+  // Save as txt
+  let txtContent = "";
+  for (let i = 0; i < books.length; i++) {
+    txtContent += `${books[i].title}\n\n`;
+    books[i].highlights.forEach((highlight) => {
+      txtContent += `- ${highlight}\n`;
+    });
+    txtContent += "\n\n\n";
+  }
+  fs.writeFile("./kindleHighlights.txt", txtContent, (err) => {
     if (err) console.log(err);
   });
+
+  // Close browser
   await browser.close();
 })();
