@@ -1,4 +1,5 @@
 const puppeteer = require("puppeteer");
+const fs = require("fs");
 const dotenv = require("dotenv");
 dotenv.config();
 (async () => {
@@ -66,16 +67,27 @@ dotenv.config();
       }) > .annotatedBookItem__knhLink > .annotatedBookItem__box > .annotatedBookItem__mainColumn > .annotatedBookItem__bookInfo > .annotatedBookItem__bookInfo__bookTitle`
     );
     await page.waitForSelector("#allHighlightsAndNotes");
+    let bookTitle = await page.$eval(
+      "body > div.content > div.mainContentContainer > div.mainContent > div.mainContentFloat > div.readingNotesMainContainer > div.readingNotesMainContainer__rightColumn > div.readingNotesBookDetailsContainer > div.gr-h2.gr-h2--serif > span > a",
+      (e) => {
+        return e.innerText;
+      }
+    );
     let highlights = await page.$eval("#allHighlightsAndNotes", (e) => {
       let aux = [];
       let htmlHighlights = [e.children];
       for (let j = 0; j < e.children.length; j++) {
-        aux.push(htmlHighlights[0].item(j).innerText);
+        let highlight = htmlHighlights[0].item(j).innerText.split("\n");
+        aux.push(highlight[1]);
       }
       return aux;
     });
-    console.log(highlights);
+    books.push({ title: bookTitle, highlights: highlights });
+    await page.goBack();
   }
-
-  // await browser.close();
+  console.log(books);
+  fs.writeFile("./kindleHighlights.txt", JSON.stringify(books), (err) => {
+    if (err) console.log(err);
+  });
+  await browser.close();
 })();
