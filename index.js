@@ -6,7 +6,7 @@ dotenv.config();
 (async () => {
   // Puppeteer Config
   const browser = await puppeteer.launch({
-    headless: myArgs[0] === "true" ? true : false,
+    headless: myArgs[0] ? false : true,
   });
   const page = await browser.newPage();
   await page.goto("https://www.goodreads.com/user/sign_in?source=home");
