@@ -6,7 +6,7 @@ dotenv.config();
 (async () => {
   // Puppeteer Config
   const browser = await puppeteer.launch({
-    headless: myArgs[0] ? false : true,
+    headless: myArgs[2] ? false : true,
   });
   const page = await browser.newPage();
   await page.goto("https://www.goodreads.com/user/sign_in?source=home");
@@ -25,10 +25,10 @@ dotenv.config();
   await newPage.waitForSelector(
     ".a-section > .a-spacing-none > .a-section > .a-box > .a-box-inner"
   );
-  await newPage.type(".a-section #ap_email", process.env.EMAIL, 3000);
+  await newPage.type(".a-section #ap_email", myArgs[0], 3000);
   await newPage.waitForSelector(".a-section #ap_password");
   await newPage.click(".a-section #ap_password");
-  await newPage.type(".a-section #ap_password", process.env.PASS);
+  await newPage.type(".a-section #ap_password", myArgs[1]);
   await newPage.click(
     ".a-section > .a-spacing-none > .a-section > .a-box > .a-box-inner"
   );
