@@ -74,6 +74,9 @@ dotenv.config();
         return e.innerText;
       }
     );
+    let coverUrl = await page.$eval("#coverImage", (e) => {
+      return e.src;
+    });
     let highlights = await page.$eval("#allHighlightsAndNotes", (e) => {
       let aux = [];
       let htmlHighlights = [e.children];
@@ -83,7 +86,9 @@ dotenv.config();
       }
       return aux;
     });
-    books.push({ title: bookTitle, highlights: highlights });
+
+    console.log(coverUrl);
+    books.push({ title: bookTitle, cover: coverUrl, highlights: highlights });
     await page.goBack();
   }
   console.log("Books and highlights fetched!");
@@ -92,7 +97,8 @@ dotenv.config();
   console.log("Saving to file...");
   let txtContent = "";
   for (let i = 0; i < books.length; i++) {
-    txtContent += `${books[i].title}\n\n`;
+    txtContent += `${books[i].title}\n`;
+    txtContent += `Cover url: ${books[i].cover}\n\n`;
     books[i].highlights.forEach((highlight) => {
       txtContent += `- ${highlight}\n`;
     });
