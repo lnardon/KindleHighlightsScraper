@@ -9,8 +9,8 @@ dotenv.config();
     headless: myArgs[2] ? false : true,
   });
   const page = await browser.newPage();
+  await page.setViewport({ width: 1200, height: 800 });
   await page.goto("https://www.goodreads.com/user/sign_in?source=home");
-  await page.setViewport({ width: 1272, height: 1281 });
 
   // Handle Amazon Signin
   console.log("Starting Login...");
