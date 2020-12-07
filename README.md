@@ -1,4 +1,4 @@
-# Kindle Highkights Scraper
+# Kindle Highlights Scraper
 
 A scraper to extract all your kindle highlights from the goodreads website using puppeteer
 
