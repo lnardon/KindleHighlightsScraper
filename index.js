@@ -3,6 +3,7 @@ const fs = require("fs");
 const dotenv = require("dotenv");
 const myArgs = process.argv.slice(2);
 dotenv.config();
+
 (async () => {
   // Puppeteer Config
   const browser = await puppeteer.launch({
@@ -26,7 +27,7 @@ dotenv.config();
   await newPage.waitForSelector(
     ".a-section > .a-spacing-none > .a-section > .a-box > .a-box-inner"
   );
-  await newPage.type(".a-section #ap_email", myArgs[0], 3000);
+  await newPage.type(".a-section #ap_email", myArgs[0]);
   await newPage.waitForSelector(".a-section #ap_password");
   await newPage.click(".a-section #ap_password");
   await newPage.type(".a-section #ap_password", myArgs[1]);
@@ -61,6 +62,7 @@ dotenv.config();
     }
   );
   let books = [];
+
   for (let i = 0; i < booksLength; i++) {
     await page.click(
       `.annotatedBookItem:nth-child(${
@@ -77,17 +79,24 @@ dotenv.config();
     let coverUrl = await page.$eval("#coverImage", (e) => {
       return e.src;
     });
-    let highlights = await page.$eval("#allHighlightsAndNotes", (e) => {
+
+    let highlights = await page.$eval("#allHighlightsAndNotes", async (e) => {
+      // Expand Large highlights
+      let expandButtons = document.querySelectorAll("a[data-text-id]");
+      expandButtons.forEach((button) => {
+        button.click();
+      });
+
       let aux = [];
       let htmlHighlights = [e.children];
       for (let j = 0; j < e.children.length; j++) {
         let highlight = htmlHighlights[0].item(j).innerText.split("\n");
-        aux.push(highlight[1]);
+        let parsedHighlight = highlight[1].replace(" (less)", ".");
+        aux.push(parsedHighlight);
       }
       return aux;
     });
 
-    console.log(coverUrl);
     books.push({ title: bookTitle, cover: coverUrl, highlights: highlights });
     await page.goBack();
   }
